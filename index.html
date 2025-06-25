@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Letter Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Letter for Mr. Lauder</title>
   <style>
     :root {
       --base: #5e5690;
@@ -19,74 +19,102 @@
       box-sizing: border-box;
     }
 
-    .center-flex {
+    body {
+      background-color: #f4f3fa;
+      height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
+      font-family: Georgia, serif;
     }
 
     .container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .content {
       position: relative;
       perspective: 600px;
+      width: 300px;
+      height: 180px;
     }
 
     .shadow {
       position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
       width: 200px;
       height: 1px;
       background: transparent;
       border-radius: 30%;
       box-shadow: 50px 100px 10px 5px #eeeef3;
+      transition: all 0.7s ease;
+      z-index: 10;
+    }
+
+    .shadow.expanded {
+      width: 450px;
+      box-shadow: -75px 150px 10px 5px #eeeef3;
     }
 
     .letter {
       position: absolute;
       top: 10px;
       left: 10px;
-      width: 280px;
-      height: 160px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 15;
-      border-radius: 2px;
+      width: 200px;
+      height: 120px;
+      padding: 10px;
+      overflow: hidden;
       background: var(--letter);
       box-shadow: 0px 1px 7px -2px var(--base);
+      border-radius: 4px;
+      color: var(--base);
+      font-size: 14px;
+      line-height: 1.5;
+      opacity: 0;
+      transform-origin: top left;
+      transform: scale(0.7);
+      cursor: default;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      user-select: text;
+      z-index: 15;
+      transition: all 0.7s ease;
     }
 
-    .body {
-      position: relative;
-      width: 240px;
-      height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--base);
-      flex-direction: column;
+    .letter.opened {
+      width: 450px;
+      max-height: 480px;
+      padding: 25px 30px 30px 30px;
+      overflow-y: auto;
+      opacity: 1;
+      transform-origin: center center;
+      transform: scale(1);
+      top: 50%;
+      left: 50%;
+      position: fixed;
+      transform-style: preserve-3d;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      border-radius: 8px;
+      transform: translate(-50%, -50%) scale(1);
+      background: var(--letter);
+      cursor: auto;
+    }
+
+    .body p {
+      margin-bottom: 1em;
     }
 
     .close {
       position: absolute;
-      right: 0;
-      top: 0;
-      font-size: 30px;
-      font-family: 'Manjari', sans-serif;
+      right: 15px;
+      top: 10px;
+      font-size: 26px;
+      font-family: Arial, sans-serif;
       cursor: pointer;
       user-select: none;
-    }
-
-    .message {
-      font-size: 40px;
-      font-weight: 900;
-      text-align: center;
-      font-family: 'Great Vibes', cursive;
+      color: var(--base-dark);
+      font-weight: bold;
+      z-index: 20;
     }
 
     .envelope {
@@ -95,6 +123,11 @@
       height: 180px;
       background: linear-gradient(#cccbd7 0.5px, var(--base-light) 0.5px);
       cursor: pointer;
+      border-radius: 4px;
+      z-index: 30;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      transition: transform 1s ease;
+      perspective: 600px;
     }
 
     .envelope::before {
@@ -107,94 +140,143 @@
       border-left: 150px solid transparent;
       border-right: 150px solid transparent;
       box-sizing: border-box;
-      z-index: 30;
+      z-index: 35;
       transform-origin: top;
+      transition: transform 1s ease;
+      backface-visibility: hidden;
+    }
+
+    .envelope.opened::before {
+      transform: rotateX(180deg);
+      z-index: 10;
     }
 
     .envelope::after {
       content: '';
       position: absolute;
       top: 0;
-      width: 300px;
-      height: 180px;
+      width: 600px;
+      height: 360px;
       z-index: 25;
       background:
         linear-gradient(30deg, var(--base-dark) 47%, var(--shadow) 50%, var(--base) 50%) 150px 90px / 150px 90px no-repeat,
         linear-gradient(31deg, var(--base) 49%, var(--shadow) 50%, transparent 50%) 0px 0px / 152px 90px no-repeat,
         linear-gradient(150deg, var(--base) 50%, var(--shadow) 50%, var(--base-dark) 53%) 0px 90px / 151px 90px no-repeat,
         linear-gradient(148.7deg, transparent 50%, var(--shadow) 50%, var(--base) 51%) 150px 0px / 150px 90px no-repeat;
+      border-radius: 4px;
+    }
+
+    p{
+        font-size: large;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="content">
-      <div class="envelope" onclick="openCard()"></div>
-      <div class="letter">
+      <div class="envelope" id="envelope" onclick="openCard()"></div>
+      <div class="letter" id="letter">
+        <span class="close" onclick="event.stopPropagation(); closeCard()">×</span>
         <div class="body">
-          <span class="close" onclick="event.stopPropagation(); closeCard()">x</span>
-          <div class="message">fin.</div>
+          <p>Dear Mr. Lauder,</p>
+          <p>We just wanted to take a moment to say thank you, not just for mentoring us through computer science, but for everything else you’ve helped us learn along the way.</p>
+          <p>In your class, we grew in more ways than we expected to. Your class gave us more than just knowledge and introduction to programming; it taught us other lessons that go hand in hand with software development, and most importantly it gave us confidence. Whether it was standing in front of the class for a presentation or simply expressing an idea clearly or developing a program geared towards user appeal, you helped us find and chase perfection. You made it feel okay to make mistakes, to stumble a bit, and then get back up with a laugh and keep going.</p>
+          <p>You always had a way of turning everyday moments into life lessons, little pieces of advice that stuck with us long after class ended. And that’s something we’ll carry forward, wherever we go.</p>
+          <p>Thank you for being the kind of teacher who truly sees your students and marks them based on how they have improved throughout the course. Thank you for encouraging us, challenging us, and showing us what it means to develop, not only in programming, but also as a person.</p>
+          <p>You’ve made a difference, and we're really grateful we got to be in your class.</p>
+          <p>Sincerely,<br>Zhen and Girish</p>
         </div>
       </div>
-      <div class="shadow"></div>
+      <div class="shadow" id="shadow"></div>
     </div>
   </div>
-  
-<!-- GSAP core -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
-<!-- GSAP CSSRulePlugin -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/CSSRulePlugin.min.js"></script>
-
+  <!-- GSAP core -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- GSAP CSSRulePlugin -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/CSSRulePlugin.min.js"></script>
 
   <script>
-let t1 = gsap.timeline({ paused: true }); 
-let flap = CSSRulePlugin.getRule(".envelope:before"); 
+    const letter = document.getElementById('letter');
+    const envelope = document.getElementById('envelope');
+    const shadow = document.getElementById('shadow');
+    const flap = CSSRulePlugin.getRule(".envelope::before");
 
-t1.to(flap, { 
-  duration: 0.5, 
-  cssRule: {
-    rotateX: 180
-  }
-})
- .set(flap, {
-  cssRule: {
-    zIndex: 10
-  }
-})
- .to('.letter', {
-  translateY: -200,
-  duration: 0.9, 
-  ease: "back.inOut(1.5)"
-})
- .set('.letter', {
-  zIndex: 40
-})
- .to('.letter', {
-  duration: .7,  
-  ease: "back.out(.4)",
-  translateY: -5,
-  translateZ: 250
-});
+    let isOpen = false;
 
-let t2 = gsap.timeline({ paused: true }); 
-t2.to('.shadow', {
-  delay: 1.4,
-  width: 450,
-  boxShadow: "-75px 150px 10px 5px #eeeef3",
-  ease: "back.out(.2)",
-  duration: .7
-}); 
+    function openCard() {
+      if (isOpen) return;
+      isOpen = true;
 
-function openCard(e) {
-  t1.play();
-  t2.play();
-}
+      // Animate flap
+      gsap.to(flap, {
+        duration: 0.5,
+        cssRule: { rotateX: 180 }
+      });
+      envelope.classList.add("opened");
 
-function closeCard(e) {
-  t1.reverse();
-  t2.reverse();
-}
+      // Animate letter expansion & center
+      gsap.to(letter, {
+        duration: 0.8,
+        ease: "back.out(1.4)",
+        opacity: 1,
+        scale: 1,
+        width: 1000,
+        height: 625,
+        padding: "25px 30px 30px 30px",
+        top: "50%",
+        left: "50%",
+        position: "fixed",
+        transformOrigin: "center center",
+        xPercent: -50,
+        yPercent: -50,
+        boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+        borderRadius: 8
+      });
+
+      // Animate shadow expansion
+      shadow.classList.add("expanded");
+      envelope.style.zIndex = "10";    // lower the envelope z-index when open
+        letter.style.zIndex = "50";      // raise the letter z-index when open
+    }
+
+    function closeCard() {
+      if (!isOpen) return;
+      isOpen = false;
+
+      envelope.style.zIndex = "30";    // default envelope z-index
+      letter.style.zIndex = "15";      // default letter z-index
+
+      // Animate flap close
+      gsap.to(flap, {
+        duration: 0.5,
+        cssRule: { rotateX: 0 }
+      });
+      envelope.classList.remove("opened");
+
+      // Animate letter shrink & reposition
+      gsap.to(letter, {
+        duration: 0.7,
+        ease: "back.in(1.4)",
+        opacity: 0,
+        scale: 0.7,
+        width: 200,
+        height: 120,
+        padding: "10px",
+        top: "10px",
+        left: "10px",
+        position: "absolute",
+        transformOrigin: "top left",
+        xPercent: 0,
+        yPercent: 0,
+        boxShadow: "0px 1px 7px -2px var(--base)",
+        borderRadius: 4
+      });
+
+      // Animate shadow shrink
+      shadow.classList.remove("expanded");
+    }
   </script>
 </body>
 </html>
